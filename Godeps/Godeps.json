@@ -1,0 +1,5 @@
+{
+	"ImportPath": "jira_git_webhook",
+	"GoVersion": "go1.5.1",
+	"Deps": []
+}
