@@ -6,7 +6,20 @@ import (
     "os"
     "bytes"
     "io/ioutil"
+    "encoding/json"
 )
+
+type PullRequestResponse struct {
+    Url         string
+    PullRequest struct {
+        CommitsUrl string `json:"commits_url"`
+      } `json:"pull_request"`
+}
+
+type Product struct {
+    Name  string
+    Price float64 `json:",string"`
+}
 
 func main() {
     fmt.Printf("Hi Tom")
@@ -28,9 +41,6 @@ func main() {
 
     fmt.Println("response Status:", resp.Status)
     fmt.Println("response Headers:", resp.Header)
-    body, _ := ioutil.ReadAll(resp.Body)
-    fmt.Println("response Body:", string(body))
-
 
 
     http.HandleFunc("/", hello)
@@ -42,12 +52,29 @@ func main() {
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
-    fmt.Printf("Hi Tom, printing hello world")
-
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
       //panic()
     }
+    fmt.Println("TOMMMMY", string(body))
+
+    var pr_request PullRequestResponse
+    err = json.Unmarshal([]byte(string(body)), &pr_request)
+    if err == nil {
+        fmt.Printf("%+v\n", pr_request.Url)
+        fmt.Printf("%+v\n", pr_request.PullRequest.CommitsUrl)
+        fmt.Println("response Body3^^")
+    } else {
+        fmt.Println(err)
+        fmt.Printf("%+v\n", pr_request)
+    }
+
+    url := "http://requestb.in/15xawwi1"
+    req, err = http.NewRequest("POST", url, bytes.NewBuffer([]byte(pr_request.Url)))
+    client := &http.Client{}
+    client.Do(req)
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
 
     fmt.Fprintln(res, string(body), "hello, world")
 }
