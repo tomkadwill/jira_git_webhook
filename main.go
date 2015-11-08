@@ -70,7 +70,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
         fmt.Println("response commits^^")
 
         failures := false
-        for i := 0; i <= len(commits); i++ {
+        for i := 0; i < len(commits); i++ {
 
         // Make a request for single commit
         s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[i]["sha"]}
