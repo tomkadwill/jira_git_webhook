@@ -116,7 +116,6 @@ func hello(res http.ResponseWriter, req *http.Request) {
         } else {
           s = []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", commit.Sha}
           url := strings.Join(s, "")
-          // url := "https://api.github.com/repos/tomkadwill/mud/statuses/fed9d6dc2155cea9fb5bbce3243372194acc9fc4"
           var jsonStr = []byte(`{"state": "failure","target_url": "https://example.com/build/status","description": "The build failed!","context": "JIRA/check"}`)
           req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
           req.Header.Set("X-Custom-Header", "myvalue")
@@ -134,13 +133,4 @@ func hello(res http.ResponseWriter, req *http.Request) {
     } else {
         // Do something
     }
-
-    url := "http://requestb.in/15xawwi1"
-    req, err = http.NewRequest("POST", url, bytes.NewBuffer([]byte(pr_request.Url)))
-    client := &http.Client{}
-    client.Do(req)
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    fmt.Fprintln(res, string(body), "hello, world")
 }
