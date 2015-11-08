@@ -16,9 +16,11 @@ type PullRequestResponse struct {
       } `json:"pull_request"`
 }
 
-type Product struct {
-    Name  string
-    Price float64 `json:",string"`
+type Commit struct {
+    Sha     string
+    Commit  struct {
+      Message string
+    }
 }
 
 func main() {
@@ -39,8 +41,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
     var pr_request PullRequestResponse
     err = json.Unmarshal([]byte(string(body)), &pr_request)
     if err == nil {
-        // commitsUrl := pr_request.PullRequest.CommitsUrl
-        commitsUrl := "https://api.github.com/repos/tomkadwill/mud/pulls/20/commits"
+        commitsUrl := pr_request.PullRequest.CommitsUrl
 
         req, err := http.NewRequest("GET", commitsUrl, nil)
         req.Header.Set("X-Custom-Header", "myvalue")
