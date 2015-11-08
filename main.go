@@ -7,6 +7,7 @@ import (
     "bytes"
     "io/ioutil"
     "encoding/json"
+    "strings"
 )
 
 type PullRequestResponse struct {
@@ -17,18 +18,12 @@ type PullRequestResponse struct {
 }
 
 type Commits []map[string]string
-// type Commits struct {
-//     Commit []struct {
-//         data map[string]string
-//     } `json:"commit"`
-// }
 
 type Commit struct {
-    // Sha     string
-    // Commit  struct {
-    //   Message string
-    // }
-    Message string
+    Sha     string
+    Commit  struct {
+      Message string
+    }
 }
 
 func main() {
@@ -72,6 +67,29 @@ func hello(res http.ResponseWriter, req *http.Request) {
 
         fmt.Println(commits[0]["sha"])
         fmt.Println("response commits^^")
+
+
+        // Make a request for single commit
+        s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[0]["sha"]};
+        url := strings.Join(s, "")
+
+        req, err = http.NewRequest("GET", url, nil)
+        req.Header.Set("X-Custom-Header", "myvalue")
+        req.Header.Set("Content-Type", "application/json")
+        req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
+
+        client = &http.Client{}
+        resp, err = client.Do(req)
+        if err != nil {
+            panic(err)
+        }
+        defer resp.Body.Close()
+
+        body, err = ioutil.ReadAll(resp.Body)
+
+        var commit Commit
+        err = json.Unmarshal([]byte(string(body)), &commit)
+        commit_message := commit.Commit.Message
 
     } else {
         // Do something
