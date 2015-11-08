@@ -69,9 +69,11 @@ func hello(res http.ResponseWriter, req *http.Request) {
         fmt.Println(commits[0]["sha"])
         fmt.Println("response commits^^")
 
+        failures := false
+        for i := 0; i <= len(commits); i++ {
 
         // Make a request for single commit
-        s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[0]["sha"]}
+        s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[i]["sha"]}
         url := strings.Join(s, "")
 
         req, err = http.NewRequest("GET", url, nil)
@@ -96,11 +98,11 @@ func hello(res http.ResponseWriter, req *http.Request) {
         fmt.Println(match)
         fmt.Println("does it match??")
 
-        if match==true {
+        if (match==true && failures==false) {
           s = []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", commit.Sha}
           url := strings.Join(s, "")
           // url := "https://api.github.com/repos/tomkadwill/mud/statuses/fed9d6dc2155cea9fb5bbce3243372194acc9fc4"
-          var jsonStr = []byte(`{"state": "success","target_url": "https://example.com/build/status","description": "The build failed!","context": "JIRA/check"}`)
+          var jsonStr = []byte(`{"state": "success","target_url": "https://example.com/build/status","description": "The build succeeded!","context": "JIRA/check"}`)
           req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
           req.Header.Set("X-Custom-Header", "myvalue")
           req.Header.Set("Content-Type", "application/json")
@@ -116,7 +118,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
         } else {
           s = []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", commit.Sha}
           url := strings.Join(s, "")
-          var jsonStr = []byte(`{"state": "failure","target_url": "https://example.com/build/status","description": "The build failed!","context": "JIRA/check"}`)
+          var jsonStr = []byte(`{"state": "failure","target_url": "https://example.com/build/status","description": "One of more of your stories does not contain a JIRA number","context": "JIRA/check"}`)
           req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
           req.Header.Set("X-Custom-Header", "myvalue")
           req.Header.Set("Content-Type", "application/json")
@@ -128,7 +130,10 @@ func hello(res http.ResponseWriter, req *http.Request) {
               panic(err)
           }
           defer resp.Body.Close()
+
+          failures = true
         }
+      }
 
     } else {
         // Do something
