@@ -8,6 +8,7 @@ import (
     "io/ioutil"
     "encoding/json"
     "strings"
+    "regexp"
 )
 
 type PullRequestResponse struct {
@@ -70,7 +71,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
 
 
         // Make a request for single commit
-        s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[0]["sha"]};
+        s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[0]["sha"]}
         url := strings.Join(s, "")
 
         req, err = http.NewRequest("GET", url, nil)
@@ -91,34 +92,52 @@ func hello(res http.ResponseWriter, req *http.Request) {
         err = json.Unmarshal([]byte(string(body)), &commit)
         commit_message := commit.Commit.Message
 
+        match, _ := regexp.MatchString("PLAT(.*)", commit_message)
+        fmt.Println(match)
+        fmt.Println("does it match??")
+
+        if match==true {
+          s = []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", commit.Sha}
+          url := strings.Join(s, "")
+          // url := "https://api.github.com/repos/tomkadwill/mud/statuses/fed9d6dc2155cea9fb5bbce3243372194acc9fc4"
+          var jsonStr = []byte(`{"state": "success","target_url": "https://example.com/build/status","description": "The build failed!","context": "JIRA/check"}`)
+          req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+          req.Header.Set("X-Custom-Header", "myvalue")
+          req.Header.Set("Content-Type", "application/json")
+          req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
+
+          client := &http.Client{}
+          resp, err := client.Do(req)
+          if err != nil {
+              panic(err)
+          }
+          defer resp.Body.Close()
+
+        } else {
+          s = []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", commit.Sha}
+          url := strings.Join(s, "")
+          // url := "https://api.github.com/repos/tomkadwill/mud/statuses/fed9d6dc2155cea9fb5bbce3243372194acc9fc4"
+          var jsonStr = []byte(`{"state": "failure","target_url": "https://example.com/build/status","description": "The build failed!","context": "JIRA/check"}`)
+          req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+          req.Header.Set("X-Custom-Header", "myvalue")
+          req.Header.Set("Content-Type", "application/json")
+          req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
+
+          client := &http.Client{}
+          resp, err := client.Do(req)
+          if err != nil {
+              panic(err)
+          }
+          defer resp.Body.Close()
+        }
+
     } else {
         // Do something
     }
 
-
-    // Need to get the sha below from the API request rather than hardcoding
-    url := "https://api.github.com/repos/tomkadwill/mud/statuses/fed9d6dc2155cea9fb5bbce3243372194acc9fc4"
-    var jsonStr = []byte(`{"state": "failure","target_url": "https://example.com/build/status","description": "The build failed!","context": "toms-go/check"}`)
-    req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-    req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
-
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
-
-    fmt.Println("response Status:", resp.Status)
-    fmt.Println("response Headers:", resp.Header)
-
-
-
-    url = "http://requestb.in/15xawwi1"
+    url := "http://requestb.in/15xawwi1"
     req, err = http.NewRequest("POST", url, bytes.NewBuffer([]byte(pr_request.Url)))
-    client = &http.Client{}
+    client := &http.Client{}
     client.Do(req)
     req.Header.Set("X-Custom-Header", "myvalue")
     req.Header.Set("Content-Type", "application/json")
