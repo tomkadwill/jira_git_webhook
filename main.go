@@ -16,11 +16,19 @@ type PullRequestResponse struct {
       } `json:"pull_request"`
 }
 
+type Commits []map[string]string
+// type Commits struct {
+//     Commit []struct {
+//         data map[string]string
+//     } `json:"commit"`
+// }
+
 type Commit struct {
-    Sha     string
-    Commit  struct {
-      Message string
-    }
+    // Sha     string
+    // Commit  struct {
+    //   Message string
+    // }
+    Message string
 }
 
 func main() {
@@ -58,6 +66,13 @@ func hello(res http.ResponseWriter, req *http.Request) {
         body, err = ioutil.ReadAll(resp.Body)
         fmt.Println(string(body))
         fmt.Println("response Body3^^")
+
+        var commits Commits
+        err = json.Unmarshal([]byte(string(body)), &commits)
+
+        fmt.Println(commits[0]["sha"])
+        fmt.Println("response commits^^")
+
     } else {
         // Do something
     }
