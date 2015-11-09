@@ -114,6 +114,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
 func setStatus(sha string, state string) {
   s := []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", sha}
   url := strings.Join(s, "")
+  // TODO: fixme - the state is not dynamic
   var jsonStr = []byte(`{"state": "state","target_url": "https://example.com/build/status","description": "One of more of your stories does not contain a JIRA number","context": "JIRA/check"}`)
   req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
   req.Header.Set("X-Custom-Header", "myvalue")
