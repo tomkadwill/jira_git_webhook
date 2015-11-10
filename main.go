@@ -60,14 +60,9 @@ func hello(res http.ResponseWriter, req *http.Request) {
         defer resp.Body.Close()
 
         body, err = ioutil.ReadAll(resp.Body)
-        fmt.Println(string(body))
-        fmt.Println("response Body3^^")
 
         var commits Commits
         err = json.Unmarshal([]byte(string(body)), &commits)
-
-        fmt.Println(commits[0]["sha"])
-        fmt.Println("response commits^^")
 
         failures := false
         for i := 0; i < len(commits); i++ {
@@ -94,10 +89,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
         err = json.Unmarshal([]byte(string(body)), &commit)
         commit_message := commit.Commit.Message
 
-        match, _ := regexp.MatchString("PLAT(.*)", commit_message)
-        fmt.Println(match)
-        fmt.Println("does it match??")
-
+        match, _ := regexp.MatchString("\\[PLAT-(.*)\\]", commit_message)
         if (match==true && failures==false) {
           setStatus(commit.Sha, "success")
         } else {
