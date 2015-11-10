@@ -39,7 +39,7 @@ func main() {
 func hello(res http.ResponseWriter, req *http.Request) {
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
-      //panic()
+      panic(err)
     }
 
     var pr_request PullRequestResponse
@@ -99,7 +99,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
       }
 
     } else {
-        // Do something
+        panic(err)
     }
 }
 
