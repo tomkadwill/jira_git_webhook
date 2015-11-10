@@ -28,7 +28,7 @@ type Commit struct {
 }
 
 func main() {
-    http.HandleFunc("/", hello)
+    http.HandleFunc("/", handleRequest)
     fmt.Println("listening...")
     err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
     if err != nil {
@@ -36,7 +36,7 @@ func main() {
     }
 }
 
-func hello(res http.ResponseWriter, req *http.Request) {
+func handleRequest(res http.ResponseWriter, req *http.Request) {
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
       panic(err)
@@ -50,25 +50,8 @@ func hello(res http.ResponseWriter, req *http.Request) {
         for i := 0; i < len(commits); i++ {
 
         // Make a request for single commit
-        s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[i]["sha"]}
-        url := strings.Join(s, "")
+        commit := getCommit(commits, i)
 
-        req, err = http.NewRequest("GET", url, nil)
-        req.Header.Set("X-Custom-Header", "myvalue")
-        req.Header.Set("Content-Type", "application/json")
-        req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
-
-        client := &http.Client{}
-        resp, err := client.Do(req)
-        if err != nil {
-            panic(err)
-        }
-        defer resp.Body.Close()
-
-        body, err = ioutil.ReadAll(resp.Body)
-
-        var commit Commit
-        err = json.Unmarshal([]byte(string(body)), &commit)
         commit_message := commit.Commit.Message
 
         match, _ := regexp.MatchString("\\[PLAT-(.*)\\]", commit_message)
@@ -106,6 +89,30 @@ func getCommits(pr_request PullRequestResponse) Commits {
   err = json.Unmarshal([]byte(string(body)), &commits)
 
   return commits
+}
+
+func getCommit(commits Commits, i int) Commit{
+  s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[i]["sha"]}
+  url := strings.Join(s, "")
+
+  req, err := http.NewRequest("GET", url, nil)
+  req.Header.Set("X-Custom-Header", "myvalue")
+  req.Header.Set("Content-Type", "application/json")
+  req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
+
+  client := &http.Client{}
+  resp, err := client.Do(req)
+  if err != nil {
+      panic(err)
+  }
+  defer resp.Body.Close()
+
+  body, err := ioutil.ReadAll(resp.Body)
+
+  var commit Commit
+  err = json.Unmarshal([]byte(string(body)), &commit)
+
+  return commit
 }
 
 func setStatus(sha string, state string) {
