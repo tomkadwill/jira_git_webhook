@@ -45,25 +45,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
     var pr_request PullRequestResponse
     err = json.Unmarshal([]byte(string(body)), &pr_request)
     if err == nil {
-        commitsUrl := pr_request.PullRequest.CommitsUrl
-
-        req, err := http.NewRequest("GET", commitsUrl, nil)
-        req.Header.Set("X-Custom-Header", "myvalue")
-        req.Header.Set("Content-Type", "application/json")
-        req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
-
-        client := &http.Client{}
-        resp, err := client.Do(req)
-        if err != nil {
-            panic(err)
-        }
-        defer resp.Body.Close()
-
-        body, err = ioutil.ReadAll(resp.Body)
-
-        var commits Commits
-        err = json.Unmarshal([]byte(string(body)), &commits)
-
+        commits := getCommits(pr_request)
         failures := false
         for i := 0; i < len(commits); i++ {
 
@@ -76,8 +58,8 @@ func hello(res http.ResponseWriter, req *http.Request) {
         req.Header.Set("Content-Type", "application/json")
         req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
 
-        client = &http.Client{}
-        resp, err = client.Do(req)
+        client := &http.Client{}
+        resp, err := client.Do(req)
         if err != nil {
             panic(err)
         }
@@ -101,6 +83,29 @@ func hello(res http.ResponseWriter, req *http.Request) {
     } else {
         panic(err)
     }
+}
+
+func getCommits(pr_request PullRequestResponse) Commits {
+  commitsUrl := pr_request.PullRequest.CommitsUrl
+
+  req, err := http.NewRequest("GET", commitsUrl, nil)
+  req.Header.Set("X-Custom-Header", "myvalue")
+  req.Header.Set("Content-Type", "application/json")
+  req.SetBasicAuth(os.Getenv("GITHUB_USERNAME"), os.Getenv("GITHUB_PASSWORD"))
+
+  client := &http.Client{}
+  resp, err := client.Do(req)
+  if err != nil {
+      panic(err)
+  }
+  defer resp.Body.Close()
+
+  body, err := ioutil.ReadAll(resp.Body)
+
+  var commits Commits
+  err = json.Unmarshal([]byte(string(body)), &commits)
+
+  return commits
 }
 
 func setStatus(sha string, state string) {
