@@ -134,12 +134,20 @@ func setStatus(sha string, state string) {
 }
 
 func jsonBody(state string) string{
+  description := ""
+  if state == "failure" {
+    description = "One of more of your stories does not contain a JIRA number"
+  } else {
+    description = "This story contains a JIRA number"
+  }
+
   start := `{
     "state": "`
+  middle := `",
+    "description": "`
   end := `",
-    "description": "One of more of your stories does not contain a JIRA number",
     "context": "JIRA/check"
   }`
-  s := []string{start, state, end}
+  s := []string{start, state, middle, description, end}
   return strings.Join(s, "")
 }
