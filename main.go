@@ -92,7 +92,7 @@ func getCommits(pr_request PullRequestResponse) Commits {
 }
 
 func getCommit(commits Commits, i int) Commit{
-  s := []string{"https://api.github.com/repos/tomkadwill/mud/commits/", commits[i]["sha"]}
+  s := []string{"https://api.github.com/repos/Babylonpartners/babylon/commits/", commits[i]["sha"]}
   url := strings.Join(s, "")
 
   req, err := http.NewRequest("GET", url, nil)
@@ -116,7 +116,7 @@ func getCommit(commits Commits, i int) Commit{
 }
 
 func setStatus(sha string, state string) {
-  s := []string{"https://api.github.com/repos/tomkadwill/mud/statuses/", sha}
+  s := []string{"https://api.github.com/repos/Babylonpartners/babylon/statuses/", sha}
   url := strings.Join(s, "")
 
   jsonStr := []byte(jsonBody(state))
