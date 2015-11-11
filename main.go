@@ -136,7 +136,7 @@ func setStatus(sha string, state string) {
 func jsonBody(state string) string{
   description := ""
   if state == "failure" {
-    description = "One of more of your stories does not contain a JIRA number"
+    description = "One of more of your commits does not contain a JIRA number. Please add in the format [PLAT-160]"
   } else {
     description = "This story contains a JIRA number"
   }
