@@ -54,7 +54,7 @@ func handleRequest(res http.ResponseWriter, req *http.Request) {
 
         commit_message := commit.Commit.Message
 
-        match, _ := regexp.MatchString("\\[PLAT-(.*)\\]", commit_message)
+        match, _ := regexp.MatchString("\\[(.*)-(.*)\\]", commit_message)
         if (match==true && failures==false) {
           setStatus(commit.Sha, "success")
         } else {
